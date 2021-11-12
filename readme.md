@@ -8,7 +8,6 @@
 | SOCKS Proxy | Mana | 0% |
 | Win HTTP | Mana | 0% |
 | H/3 Quic | Mana | 0% |
-| ZLib deflate | Natalia | 0% |
 | HTTP butter | ? | 0% |
 | **Sockets** | Mana | 0% |
 | **Security** | Mana | 0% |

@@ -29,7 +29,7 @@
         - https://github.com/dotnet/runtime/issues/44094
     - HTTP/3 and QUIC
         - many PRs and issues
-    - ZLib deflate decompression for response content
+    - ~~ZLib deflate decompression for response content~~
         - https://github.com/dotnet/runtime/issues/38022
         - https://github.com/dotnet/runtime/pull/42717
         - https://github.com/dotnet/runtime/pull/57862
