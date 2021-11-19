@@ -5,7 +5,7 @@ When opening lots of HTTP/1.1 connections from the same machine simultaneously, 
 Normally, the network stack chooses a port that isn’t already bound to another socket, meaning that the number of simultaneusly open connections is limited by the [dynamic port range](https://docs.microsoft.com/en-us/windows/client-management/troubleshoot-tcpip-port-exhaust#default-dynamic-port-range-for-tcpip).
 Since the port is a 16 bit number, the port range (and the number of connections) have a theoretical limit of ~64K.
 
-[Windows introduced "auto-reuse port range"](https://support.microsoft.com/en-us/topic/reliability-and-scalability-improvements-in-tcp-ip-for-windows-8-1-and-windows-server-2012-r2-82b226f4-cadc-7676-67db-2195516b7956) to address this problem, as long as the remote endpoints differ in IP addresses and/or ports.
+Windows [introduced](https://support.microsoft.com/en-us/topic/reliability-and-scalability-improvements-in-tcp-ip-for-windows-8-1-and-windows-server-2012-r2-82b226f4-cadc-7676-67db-2195516b7956) an "auto-reuse port range" to address this problem, as long as the remote endpoints differ in IP addresses and/or ports.
 [dotnet/runtime#48219](https://github.com/dotnet/runtime/issues/54903) added a change that auto-enables `SO_REUSE_UNICASTPORT`, so ports will be reused as long as:
 - The connection’s full 4-tuple of (local port, local address, remote port, remote address) is unique
 - The auto-reuse port range is configured on the machine. Because of strict backwards-compatibility requirements in Windows, this is an opt-in feature!
