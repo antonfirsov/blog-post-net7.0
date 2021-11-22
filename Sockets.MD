@@ -27,11 +27,11 @@ From the authors of the Windows feature:
 
 Since .NET 5, we are using [DualMode](https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.socket.dualmode) sockets in `SocketsHttpHandler`.
 This allows us to handle IPv4 traffic from an IPv6 socket, and considered to be a favorable practice by [RFC1933](https://tools.ietf.org/html/rfc1933).
-On the other hand, we had several reports from users having trouble connecting through VPN tunnels which do not support IPv6 and/or dual-stack properly.
+On the other hand, we had several reports from users having trouble connecting through VPN tunnels which do not support IPv6 and/or dual-stack sockets properly.
 To mitigate these issues and other potential problems with IPv6,
-[dotnet/runtime#55012](https://github.com/dotnet/runtime/pull/55012) implemented a switch which can disable IPv6 globally for the entire .NET 6 process.
+[dotnet/runtime#55012](https://github.com/dotnet/runtime/pull/55012) implemented a switch to disable IPv6 globally for the entire .NET 6 process.
 
-You can now set the environment variable `DOTNET_SYSTEM_NET_DISABLEIPV6` or the `System.Net.DisableIPv6` [runtime configuration setting](https://docs.microsoft.com/en-us/dotnet/core/run-time-config/) to `true` if you experience similar problems and decide to solve them by disabling IPv6.
+You can now set the environment variable `DOTNET_SYSTEM_NET_DISABLEIPV6` to `1` or the `System.Net.DisableIPv6` [runtime configuration setting](https://docs.microsoft.com/en-us/dotnet/core/run-time-config/) to `true` if you experience similar problems and decide to address them by disabling IPv6.
 
 ### New Span- and Task-based overloads in `System.Net.Sockets`
 
