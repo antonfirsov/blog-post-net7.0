@@ -1,24 +1,29 @@
 ## Socket-level improvements
 
 ### Handle `SocketsHttpHandler` port exhaustion by utilizing auto-reuse port range on Windows
-When opening lots of HTTP/1.1 connections from the same machine simultaneously, you may face socket error 10055 `WSAENOBUFS`, typically around ~16K connections.
-Normally, the network stack chooses a port that isn’t already bound to another socket, meaning that the number of simultaneusly open connections is limited by the [dynamic port range](https://docs.microsoft.com/en-us/windows/client-management/troubleshoot-tcpip-port-exhaust#default-dynamic-port-range-for-tcpip).
-Since the port is a 16 bit number, the port range (and the number of connections) have a theoretical limit of ~64K.
+When opening concurrent HTTP/1.1 connections at a large scale, after some time you may notice that new connection attempts are failing. On Windows this happens typically around ~16K concurrent connections, with socket error 10055 (`WSAENOBUFS`) as internal `SocketException` message.
+Normally, the network stack chooses a port that isn’t already bound to another socket, meaning that the maximum number of simultaneusly open connections is limited by the [dynamic port range](https://docs.microsoft.com/en-us/windows/client-management/troubleshoot-tcpip-port-exhaust#default-dynamic-port-range-for-tcpip).
+It's a configurable range, typically defaulting to `49152-65535` and a theoretical limit of 2<sup>16</sup>=65536, since the port is a 16 bit number.
 
-Windows [introduced](https://support.microsoft.com/en-us/topic/reliability-and-scalability-improvements-in-tcp-ip-for-windows-8-1-and-windows-server-2012-r2-82b226f4-cadc-7676-67db-2195516b7956) an "auto-reuse port range" to address this problem, as long as the remote endpoints differ in IP addresses and/or ports.
-[dotnet/runtime#48219](https://github.com/dotnet/runtime/issues/54903) added a change that auto-enables `SO_REUSE_UNICASTPORT`, so ports will be reused as long as:
-- The connection’s full 4-tuple of (local port, local address, remote port, remote address) is unique
-- The auto-reuse port range is configured on the machine. Because of strict backwards-compatibility requirements in Windows, this is an opt-in feature!
+To address this problem for the case when remote endpoints differ in IP addresses and/or ports, Windows [introduced](https://support.microsoft.com/en-us/topic/reliability-and-scalability-improvements-in-tcp-ip-for-windows-8-1-and-windows-server-2012-r2-82b226f4-cadc-7676-67db-2195516b7956) a feature called **auto-reuse port range** back in the Windows 8.1 times. .NET framework exposed this feature through an opt-in property [`ServicePointManager.ReusePort`](https://docs.microsoft.com/en-us/dotnet/api/system.net.servicepointmanager.reuseport), but this property bacame a no-op API on .NET Core / .NET 5+. Instead, [dotnet/runtime#48219](https://github.com/dotnet/runtime/issues/54903) added a change that enables `SO_REUSE_UNICASTPORT` for all outgoing asynchronous `Socket` connections on .NET 6+, so ports will be reused as long as:
+- The connection’s full 4-tuple of (local port, local address, remote port, remote address) is unique.
+- The auto-reuse port range is configured on the machine.
 
 You can set the auto-reuse port range with the following PowerShell cmdlet:
 
 ```powershell
-Set-NetTCPSetting -SettingName InternetCustom -AutoReusePortRangeStartPort <start port> -AutoReusePortRangeNumberOfPorts <num. of ports>
+Set-NetTCPSetting -SettingName InternetCustom `
+                  -AutoReusePortRangeStartPort <start-port> `
+                  -AutoReusePortRangeNumberOfPorts <number-of-ports>
 ```
 
 A reboot is required for the setting to take effect.
 
-### An option to disable IPv6
+From the authors of the Windows feature:
+
+> Due to sticky backward-compatibility problems, the auto-reuse port range must be used exclusively for outbound connections using this special logic. That means if the auto-reuse port range is configured to overlap with a well-known listen port (port 80, for instance), then an attempt to bind a listening socket to that port will fail. Also, if the auto-reuse port range fully covers the regular ephemeral port range, then normal wildcard binds will fail. Normally, choosing an auto-reuse range that is a strict subset of the default ephemeral port range will avoid problems. But the admin must still be careful, because some applications use large port numbers inside the ephemeral port range as "well-known" port numbers.
+
+### An option to globally disable IPv6
 
 Since .NET 5, we are using [DualMode](https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.socket.dualmode) sockets in `SocketsHttpHandler`.
 This allows us to handle IPv4 traffic from an IPv6 socket, and considered to be a favorable practice by [RFC1933](https://tools.ietf.org/html/rfc1933).
@@ -26,8 +31,7 @@ On the other hand, we had several reports from users having trouble connecting t
 To mitigate these issues and other potential problems with IPv6,
 [dotnet/runtime#55012](https://github.com/dotnet/runtime/pull/55012) implemented a switch which can disable IPv6 globally for the entire .NET 6 process.
 
-You can now set the environment variable `DOTNET_SYSTEM_NET_DISABLEIPV6` or the `System.Net.DisableIPv6` [runtime configuration setting](https://docs.microsoft.com/en-us/dotnet/core/run-time-config/) to `true`
-if you experience similar problems and decide to mitigate them by disabling IPv6.
+You can now set the environment variable `DOTNET_SYSTEM_NET_DISABLEIPV6` or the `System.Net.DisableIPv6` [runtime configuration setting](https://docs.microsoft.com/en-us/dotnet/core/run-time-config/) to `true` if you experience similar problems and decide to solve them by disabling IPv6.
 
 ### New Span- and Task-based overloads in `System.Net.Sockets`
 
