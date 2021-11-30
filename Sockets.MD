@@ -26,7 +26,7 @@ From the authors of the Windows feature:
 ### An option to globally disable IPv6
 
 Since .NET 5, we are using [DualMode](https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.socket.dualmode) sockets in `SocketsHttpHandler`.
-This allows us to handle IPv4 traffic from an IPv6 socket, and considered to be a favorable practice by [RFC1933](https://tools.ietf.org/html/rfc1933).
+This allows us to handle IPv4 traffic from an IPv6 socket, and is considered to be a favorable practice by [RFC1933](https://tools.ietf.org/html/rfc1933).
 On the other hand, we had several reports from users having trouble connecting through VPN tunnels which do not support IPv6 and/or dual-stack sockets properly.
 To mitigate these issues and other potential problems with IPv6,
 [dotnet/runtime#55012](https://github.com/dotnet/runtime/pull/55012) implemented a switch to disable IPv6 globally for the entire .NET 6 process.
