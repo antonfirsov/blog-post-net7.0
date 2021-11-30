@@ -35,6 +35,6 @@ You can now set the environment variable `DOTNET_SYSTEM_NET_DISABLEIPV6` to `1` 
 
 ### New Span- and Task-based overloads in `System.Net.Sockets`
 
-With the help of the community, we managed to bring `Socket` and related types close to API-complete in terms of Span, Task, and cancellation support.
+With the help of the community, we managed to bring `Socket` and related types close to API-complete in terms of `Span`, `Task`, and cancellation support.
 The complete API-diff is  way too long to include into this blog post, you can find it [here](https://github.com/dotnet/core/blob/main/release-notes/6.0/api-diff/.Net/6.0.0_System.Net.Sockets.md).
 We would like to thank [@gfoidl](https://github.com/gfoidl), [@ovebastiansen](https://github.com/ovebastiansen) and [@PJB3005](https://github.com/PJB3005) for their contributions!
