@@ -1,6 +1,6 @@
 ## Socket-level improvements
 
-### Handle `SocketsHttpHandler` port exhaustion by utilizing auto-reuse port range on Windows
+### Handle port exhaustion by utilizing auto-reuse port range on Windows
 When opening concurrent HTTP/1.1 connections on a large scale, you may notice that new connection attempts start failing after some time. On Windows, this happens typically around ~16K concurrent connections, with socket error 10055 (`WSAENOBUFS`) as an internal `SocketException` message.
 Normally, the network stack chooses a port that isn’t already bound to another socket, meaning that the maximum number of simultaneusly open connections is limited by the [dynamic port range](https://docs.microsoft.com/en-us/windows/client-management/troubleshoot-tcpip-port-exhaust#default-dynamic-port-range-for-tcpip).
 This is a configurable range, typically defaulting to `49152-65535` and a theoretical limit of 2<sup>16</sup>=65536 ports, since a port is a 16 bit number.
